@@ -3,6 +3,8 @@
 import { redirect } from 'next/navigation';
 import { sql } from '../../lib/db.js';
 import { getViewer } from '../../lib/viewer.js';
+import { getSchedule } from '../../lib/event.js';
+import { windowState } from '../../lib/stage.js';
 import { fieldErrors, registrationSchema } from '../../lib/registration.js';
 
 function slugFor(name) {
@@ -16,6 +18,8 @@ export async function registerTeam(input) {
   if (!viewer) return { formError: 'Your session ended. Sign in again to register.' };
   if (!viewer.verified) return { formError: 'Sign in with a verified personal email to register.' };
   if (viewer.teamId) redirect('/dashboard');
+  if (viewer.role !== 'student') return { formError: 'Judge and organiser accounts can’t register a team.' };
+  if (windowState((await getSchedule()).registration) !== 'open') return { formError: 'Registration isn’t open right now.' };
 
   // Never trust the browser's check: validate again with the same schema.
   const parsed = registrationSchema.safeParse(input);

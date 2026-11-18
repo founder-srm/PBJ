@@ -18,17 +18,17 @@ function fetchStatus(userId) {
   return cache.promise;
 }
 
-// { pending, signedIn, registered } for the current visitor. Until the session and team lookup answer,
+// { pending, signedIn, registered, home } for the current visitor (home: '/judge', '/admin', … or null). Until the session and team lookup answer,
 // signedIn/registered are false, so callers show the signed-out state and then update.
 export function useViewerStatus() {
   const { data, isPending } = authClient.useSession();
   const userId = data?.user?.id ?? null;
-  const [team, setTeam] = useState({ userId: null, registered: null });
+  const [team, setTeam] = useState({ userId: null, registered: null, home: null });
 
   useEffect(() => {
     if (!userId) return undefined;
     let live = true;
-    fetchStatus(userId).then((d) => live && setTeam({ userId, registered: Boolean(d.registered) }));
+    fetchStatus(userId).then((d) => live && setTeam({ userId, registered: Boolean(d.registered), home: d.home ?? null }));
     return () => { live = false; };
   }, [userId]);
 
@@ -37,5 +37,6 @@ export function useViewerStatus() {
     pending: isPending || (Boolean(userId) && registered === null),
     signedIn: Boolean(userId),
     registered: Boolean(registered),
+    home: userId && team.userId === userId ? team.home : null,
   };
 }

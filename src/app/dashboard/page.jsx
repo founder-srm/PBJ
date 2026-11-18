@@ -1,25 +1,19 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Badge, Button, JellyDrip, PeanutAmount } from '../../design-system/components.jsx';
+import { Badge, JellyDrip, PeanutAmount } from '../../design-system/components.jsx';
 import SignOutButton from '../../components/SignOutButton.jsx';
 import { SiteFooter, SiteHeader } from '../../site.jsx';
-import { EVENT } from '../../content.js';
 import { sql } from '../../lib/db.js';
+import { getSchedule, getSettings, formatDate } from '../../lib/event.js';
+import { checkDriveLink } from '../../lib/drive.js';
+import { getLiveState } from '../../lib/live.js';
+import { effectiveStage } from '../../lib/stage.js';
 import { getViewer } from '../../lib/viewer.js';
-import { NEXT_STEP } from './next-step.js';
+import HomeStage, { STAGE_BADGE, formatEventDates } from './HomeStage.jsx';
 import './dashboard.css';
 
 export const metadata = { title: 'Dashboard · PBJ' };
 export const dynamic = 'force-dynamic';
-
-const STATUS = {
-  registered: { tone: 'cloud', label: 'Registered · fee pending' },
-  paid: { tone: 'gain', label: 'Paid · ready to play' },
-  finalist: { tone: 'jelly', label: 'Finalist' },
-  winner: { tone: 'jelly', label: 'Winner' },
-  withdrawn: { tone: 'cloud', label: 'Withdrawn' },
-  disqualified: { tone: 'cloud', label: 'Disqualified' },
-};
 
 // Sidebar items. The selected one comes from ?view=; the first (home) is the default.
 const VIEWS = [
@@ -29,8 +23,6 @@ const VIEWS = [
   { id: 'team', label: 'Team Details' },
 ];
 
-const opensOn = `Opens ${EVENT.dates.split('–')[0]} Feb`;
-
 export default async function DashboardPage({ searchParams }) {
   const viewer = await getViewer();
   if (!viewer) redirect('/login');
@@ -39,8 +31,9 @@ export default async function DashboardPage({ searchParams }) {
   const { view: requested } = await searchParams;
   const view = VIEWS.find((v) => v.id === requested)?.id ?? VIEWS[0].id;
 
+  const [schedule, settings] = await Promise.all([getSchedule(), getSettings()]);
   const [team] = await sql`
-    select t.name, t.slug, t.status, t.size, t.created_at, r.name as room, b.balance
+    select t.name, t.slug, t.stage, t.size, t.team_code, t.pitch_video_url, t.created_at, r.name as room, b.balance
     from teams t
     left join rooms r on r.id = t.room_id
     join team_balances b on b.team_id = t.id
@@ -50,8 +43,12 @@ export default async function DashboardPage({ searchParams }) {
         select position, name, ra_number, college_email from team_members
         where team_id = ${viewer.teamId} order by position`
     : [];
-  const status = STATUS[team.status] ?? STATUS.registered;
-  const next = NEXT_STEP[team.status] ?? NEXT_STEP.registered;
+  const stage = effectiveStage(team.stage, schedule);
+  const badge = STAGE_BADGE[stage];
+  const live = view === 'home' && stage === 'live' ? await getLiveState(viewer.teamId) : null;
+  // Re-check the video's sharing while it's under review, in case the team made it private after submitting.
+  const videoAccess = view === 'home' && stage === 'in_review' && team.pitch_video_url ? await checkDriveLink(team.pitch_video_url) : null;
+  const opensOn = `Opens ${formatDate(schedule.event.startsAt).replace(/ \d{4}$/, '')}`;
   const firstName = viewer.name.split(' ')[0] || 'there';
 
   return (
@@ -85,37 +82,19 @@ export default async function DashboardPage({ searchParams }) {
             {view === 'home' ? (
               <>
                 <div className="band-head">
-                  <p className="eyebrow">Dashboard · {EVENT.dates}</p>
+                  <p className="eyebrow">Dashboard</p>
                   <h1 className="display-l">{team.name}</h1>
                   <div className="dash-wallet-line">
                     <PeanutAmount value={Number(team.balance)} size="md" unit />
                   </div>
                   <p className="plain-lead">Welcome, {firstName}. This is your team’s home for PBJ.</p>
                   <div className="meta">
-                    <Badge tone={status.tone}>{status.label}</Badge>
-                    <Badge tone="cloud">{team.room ? `Room ${team.room}` : 'Room assigned at check-in'}</Badge>
+                    {badge ? <Badge tone={badge.tone}>{badge.label}</Badge> : null}
+                    {team.room ? <Badge tone="cloud">Venue: {team.room}</Badge> : null}
                   </div>
                 </div>
 
-                <section className="pbj pbj-reg dash-card dash-next" aria-labelledby="dash-next-title">
-                  <div className="pbj-reg-head">
-                    <p className="dash-next-eyebrow">What to do now</p>
-                    <h3 id="dash-next-title">{next.title}</h3>
-                    <p>{next.body}</p>
-                  </div>
-                  {next.steps ? (
-                    <ol className="wide dash-next-steps">
-                      {next.steps.map((s) => <li key={s}>{s}</li>)}
-                    </ol>
-                  ) : null}
-                  {next.action ? (
-                    <div className="wide">
-                      {next.action.href
-                        ? <Button href={next.action.href} target="_blank" rel="noopener noreferrer">{next.action.label}</Button>
-                        : <p className="note">{next.action.pending}</p>}
-                    </div>
-                  ) : null}
-                </section>
+                <HomeStage stage={stage} team={team} schedule={schedule} settings={settings} live={live} videoAccess={videoAccess} />
               </>
             ) : null}
 

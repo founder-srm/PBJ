@@ -6,5 +6,5 @@ import { auth } from './lib/auth/server.js';
 export default auth.middleware({ loginUrl: '/login' });
 
 export const config = {
-  matcher: ['/register', '/dashboard/:path*'],
+  matcher: ['/register', '/dashboard/:path*', '/admin/:path*', '/judge/:path*'],
 };

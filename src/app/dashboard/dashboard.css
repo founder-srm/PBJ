@@ -28,6 +28,22 @@
 .dash-next-eyebrow { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
 .dash-next-steps { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: var(--space-2); color: var(--ink); font-size: 16px; line-height: 1.5; }
 
+.dash-next-body { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); min-width: 0; }
+.dash-next-body > * { max-width: 100%; }
+.dash-next-body a { color: var(--ink); overflow-wrap: anywhere; }
+.dash-form { display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 560px; }
+.dash-form-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.dash-code { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.dash-code code { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink); background: var(--surface); border: 2px dashed var(--line-strong); border-radius: var(--radius-md); padding: 8px 16px; }
+.dash-countdown { align-self: stretch; }
+.dash-invest { display: flex; flex-direction: column; gap: var(--space-6); width: 100%; }
+.dash-invest-now { display: flex; flex-direction: column; gap: var(--space-2); }
+.dash-invest-team { margin: 0; font-family: var(--font-display); font-size: 36px; font-weight: 700; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
+.dash-budget { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+.dash-budget div { background: var(--surface); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.dash-budget dt { font-size: 13px; font-weight: 700; color: var(--ink-muted); }
+.dash-budget dd { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; color: var(--ink-muted); font-size: 14px; }
+
 /* Other views: no card, the page starts with the view itself */
 .dash-view { display: flex; flex-direction: column; gap: var(--space-8); }
 .dash-view-title { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-size: 48px; line-height: 1.1; font-weight: 700; color: var(--ink); }
@@ -48,4 +64,7 @@
   .dash-side-nav { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
   .dash-side-link { padding: 12px 4px; border-radius: var(--radius-pill); text-align: center; font-size: 13px; line-height: 1.2; }
   .dash-view-title { font-size: 34px; }
+  .dash-budget { grid-template-columns: 1fr; }
+  .dash-code code { font-size: 22px; }
 }
+.dash-alert { margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); border: 2px solid var(--jelly); background: var(--jelly-soft); font-weight: 600; }

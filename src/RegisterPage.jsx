@@ -6,7 +6,8 @@ import { COLLEGE_DOMAIN } from './lib/registration.js';
 import { SiteFooter, SiteHeader } from './site.jsx';
 
 // `viewer` is the signed-in user (see src/lib/viewer.js). Only verified SRM accounts get the form.
-export default function RegisterPage({ viewer }) {
+// `closed` is a message when registration isn't open (dates from event_schedule), else null.
+export default function RegisterPage({ viewer, closed }) {
   return (
     <div className="page page-plain">
       <JellyDrip className="page-drip" />
@@ -23,7 +24,14 @@ export default function RegisterPage({ viewer }) {
               <Badge tone="cloud">SRM college email</Badge>
             </div>
           </div>
-          {viewer.verified ? (
+          {closed ? (
+            <div className="pbj pbj-reg">
+              <div className="pbj-reg-head">
+                <h3>Registration isn’t open</h3>
+                <p>{closed}</p>
+              </div>
+            </div>
+          ) : viewer.verified ? (
             <RegistrationForm fee={EVENT.fee} leader={{ name: viewer.name, email: viewer.email }} />
           ) : (
             <div className="pbj pbj-reg">

@@ -49,6 +49,10 @@ src/
     login/page.jsx            /login       (server; redirects signed-in users)
     register/page.jsx         /register    (server; gate) + actions.js (registerTeam server action)
     dashboard/page.jsx        /dashboard   (server; team home)
+    admin/*                   /admin/{teams,payments,venues,judging,judges,schedule} (organisers only)
+    judge/*                   /judge, /judge/[teamId] (judges score teams in their venues)
+    api/pitch/route.js        live investing state for the dashboard
+    api/razorpay/webhook/     Razorpay payment.captured → confirm_team_payment()
     not-found.jsx             404 page
     api/auth/[...path]/       Neon Auth proxy (do not edit)
     api/me/route.js           { signedIn, registered } for client components
@@ -65,8 +69,15 @@ src/
     db.js                     `sql` tagged template (Neon HTTP driver, server-only)
     viewer.js                 getViewer(): who is signed in, verified?, which team
     useViewerStatus.js        client hook: signed in? registered?
+    event.js                  getSchedule(), getSettings(), IST date formatting (server-only)
+    stage.js                  effectiveStage(), windowState()
+    live.js                   getLiveState(): venue, current pitch, invest budget (server-only)
+    admin.js                  requireOrganiser() (server-only)
+    judge.js                  requireJudge(), getCriteria(), getRounds(), pickRound() (server-only)
+    venues.js                 divideEvenly(): split teams across venues
+    pitch.js                  Zod schema for the pitch-video link
     registration.js           Zod schema + field rules for team registration
-  proxy.js                    Next 16 "proxy" (middleware): protects /register, /dashboard; finishes Google sign-in
+  proxy.js                    Next 16 "proxy" (middleware): protects /register, /dashboard, /admin, /judge; finishes Google sign-in
   styles.css                  Page-level styles for every route (shared hotspot, see below)
 db/migrations/                Ordered SQL migrations, already applied to Neon
 scripts/build-tokens.mjs      tokens.json → tokens.css
@@ -119,12 +130,17 @@ These are imported almost everywhere. Change them additively (add, don't rename 
 
 Code in one area relies on these. Don't change their shape without updating every caller (search for the name).
 
-- `getViewer()` (`src/lib/viewer.js`, server-only) → `null` or `{ id, name, email, image, emailVerified, collegeLogin, verified, teamId }`. Cached per request. Also upserts the `users` row.
-- `useViewerStatus()` (client) → `{ pending, signedIn, registered }`, backed by `GET /api/me` → `{ signedIn, registered }`.
+- `getViewer()` (`src/lib/viewer.js`, server-only) → `null` or `{ id, name, email, image, emailVerified, collegeLogin, verified, teamId, role }`. Cached per request. Also upserts the `users` row. `homeFor(viewer)` → where they belong (`/dashboard`, `/register`, `/judge`, `/admin`).
+- `useViewerStatus()` (client) → `{ pending, signedIn, registered, home }`, backed by `GET /api/me` → `{ signedIn, registered, home }`.
 - `registrationSchema` / `fieldErrors()` (`src/lib/registration.js`): used by the form (client) and `registerTeam` (server). Error keys are dotted paths like `members.1.raNumber`.
 - `registerTeam(input)` server action → `{ errors }` | `{ formError }` | redirects to `/dashboard`.
 - Route constants `REGISTER_HREF`, `LOGIN_HREF`, `DASHBOARD_HREF` in `src/site.jsx`.
 - Database views `team_balances`, `verified_users`, `leaderboard`: platform pages read these instead of re-deriving numbers.
+- `getSchedule()` / `getSettings()` (`src/lib/event.js`, server-only): event dates and settings from `event_schedule` / `event_settings`. Never hard-code a stage date.
+- `effectiveStage(stage, schedule)` (`src/lib/stage.js`): what a team sees; see `docs/registration-and-dashboard.md`.
+- DB functions `confirm_team_payment()` and `invest()`: the only way to mark a team paid or invest (see `docs/database.md`).
+- `requireOrganiser()` / `getOrganiser()` (`src/lib/admin.js`): guard for `/admin/*` pages and actions.
+- `requireJudge()` / `getJudge()` / `getCriteria()` / `getRounds()` / `pickRound()` (`src/lib/judge.js`), DB function `save_evaluation(judge, round, team, scores, notes)` and per-round views `evaluation_totals`, `team_judging`, `criterion_averages`: judging (see `docs/database.md`).
 
 ## Rules that apply everywhere
 

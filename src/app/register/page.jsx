@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import RegisterPage from '../../RegisterPage.jsx';
-import { getViewer } from '../../lib/viewer.js';
+import { formatDateTime, getSchedule } from '../../lib/event.js';
+import { windowState } from '../../lib/stage.js';
+import { getViewer, homeFor } from '../../lib/viewer.js';
 
 export const metadata = {
   title: 'Register · PBJ',
@@ -12,6 +14,13 @@ export default async function Page() {
   // src/proxy.js already sends signed-out visitors to /login; this is the server-side backstop.
   const viewer = await getViewer();
   if (!viewer) redirect('/login');
-  if (viewer.teamId) redirect('/dashboard');
-  return <RegisterPage viewer={viewer} />;
+  if (viewer.teamId || viewer.role !== 'student') redirect(homeFor(viewer));
+
+  // Registration dates come from event_schedule ('registration').
+  const w = (await getSchedule()).registration;
+  const state = windowState(w);
+  const closed = state === 'open' ? null
+    : state === 'upcoming' ? `Registration opens on ${formatDateTime(w.startsAt)}.`
+    : `Registration closed on ${formatDateTime(w?.endsAt)}.`;
+  return <RegisterPage viewer={viewer} closed={closed} />;
 }

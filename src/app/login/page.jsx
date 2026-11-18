@@ -3,14 +3,14 @@ import { JellyDrip } from '../../design-system/components.jsx';
 import LoginPanel from '../../components/LoginPanel.jsx';
 import { EVENT } from '../../content.js';
 import { SiteFooter, SiteHeader } from '../../site.jsx';
-import { getViewer } from '../../lib/viewer.js';
+import { getViewer, homeFor } from '../../lib/viewer.js';
 
 export const metadata = { title: 'Login · PBJ' };
 export const dynamic = 'force-dynamic';
 
 export default async function LoginPage() {
   const viewer = await getViewer();
-  if (viewer) redirect(viewer.teamId ? '/dashboard' : '/register');
+  if (viewer) redirect(homeFor(viewer));
 
   return (
     <div className="page page-plain">

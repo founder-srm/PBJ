@@ -70,13 +70,18 @@ function ThemeToggle() {
   );
 }
 
-// Signed out: "Login". Signed in: "Register" (or "Dashboard" once the team exists) plus a log-out door.
+// Signed out: "Login". Signed in: "Register" (or "Dashboard" once the team exists; "Judging" for judges, "Admin" for
+// organisers) plus a log-out door.
 export function SiteHeader() {
   // Shows the signed-out label first and switches once the session (and team) check answers.
-  const { signedIn, registered } = useViewerStatus();
+  const { signedIn, registered, home } = useViewerStatus();
   const cta = !signedIn
     ? { label: 'Login', href: LOGIN_HREF }
-    : registered
+    : home === '/judge'
+      ? { label: 'Judging', href: '/judge' }
+      : home === '/admin'
+        ? { label: 'Admin', href: '/admin' }
+        : registered
       ? { label: 'Dashboard', href: DASHBOARD_HREF }
       : { label: 'Register', href: REGISTER_HREF };
   return (

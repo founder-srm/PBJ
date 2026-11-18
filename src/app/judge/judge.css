@@ -1,0 +1,24 @@
+/* Judge pages (built on admin.css). */
+.judge-now { margin: 0; font-weight: 700; color: var(--ink); }
+.judge-now a { color: var(--ink); }
+.judge-teams { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.judge-team { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); text-decoration: none; }
+.judge-team:hover { outline: 2px solid var(--line-strong); }
+.judge-team-name { font-weight: 700; overflow-wrap: anywhere; }
+.judge-score { font-weight: 700; font-size: 14px; color: var(--gain); }
+.judge-score.is-empty { color: var(--ink-muted); font-weight: 600; }
+.judge-score.is-partial { color: var(--butter-text); }
+.judge-form { display: flex; flex-direction: column; gap: var(--space-4); }
+.judge-criteria { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-4); }
+.judge-criteria legend { grid-column: 1 / -1; padding: 0; margin-bottom: var(--space-2); }
+.judge-criterion { display: flex; flex-direction: column; gap: 6px; padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); min-width: 0; }
+.judge-criterion-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+.judge-criterion .admin-sub { font-size: 13px; }
+.judge-criterion input:not([type="checkbox"]) { font-size: 22px; font-weight: 700; min-height: 52px; width: 100%; }
+.judge-criterion input[aria-invalid="true"] { border-color: var(--jelly); }
+.judge-notes { grid-column: 1 / -1; }
+.judge-notes textarea { font: 15px var(--font-sans); padding: 8px 12px; border-radius: var(--radius-md); border: 2px solid var(--line); background: var(--cloud); color: var(--ink); resize: vertical; width: 100%; }
+.judge-submit { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.judge-total { margin: 0; font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--ink); }
+.judge-save { font-size: 16px; min-height: 48px; padding: 0 28px; }
+@media (max-width: 640px) { .judge-save { width: 100%; } }

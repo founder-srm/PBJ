@@ -4,7 +4,7 @@ Owner areas: **Registration** (`src/lib/registration.js`, `src/components/Regist
 
 ## Flow
 
-`/login` → `/register` (form) → `registerTeam` → `/dashboard`. A leader who already has a team is redirected from `/register` and `/login` to `/dashboard`.
+`/login` → `/register` (form) → `registerTeam` → `/dashboard`. A leader who already has a team is redirected from `/register` and `/login` to `/dashboard`. Registration is only open inside the `registration` window of `event_schedule`.
 
 `src/app/register/page.jsx` (server, dynamic):
 1. `getViewer()`; signed out → `/login`; has a team → `/dashboard`.
@@ -58,9 +58,49 @@ Layout: a full-height sidebar fixed to the left edge of the screen (`.dash-side`
 
 The selected item comes from `?view=` (`home` default, `shop`, `leaderboard`, `team`); the server renders only that view, so it works without JS and the URL can be shared. Members are only queried for the team view.
 
-- **Home**: team name, wallet balance (`team_balances`) directly below it (with the fee note while `registered`), status and room badges, and a **What to do now** card.
-- **Team Details, Shop, Leaderboard**: no team header and no card; the page starts with the view's own title (`.dash-view`). Shop and Leaderboard are placeholders ("Opens 15 Feb").
+- **Home**: team name, wallet balance (`team_balances`) directly below it, stage and venue badges, and a **What to do now** card (`HomeStage.jsx`).
+- **Team Details, Shop, Leaderboard**: no team header and no card; the page starts with the view's own title (`.dash-view`). Shop and Leaderboard are placeholders ("Opens <event start>").
 
-**What to do now** comes from `NEXT_STEP` in `src/app/dashboard/next-step.js`, keyed by `teams.status` (`title`, `body`, optional `steps` and `action`). For `registered` it asks for a 1-minute pitch video on Google Drive; the button uses `VIDEO_SUBMIT_URL` and shows "link will appear here soon" while it's empty. Edit the copy there.
+## Event flow: what a team sees
+
+Two inputs decide it, plus the current time:
+1. **`teams.stage`** (stored, per team): `pitch_video → in_review → shortlisted | not_shortlisted → paid → finalist | winner`, plus `withdrawn`, `disqualified`. "Registration" is implicit: signed in, no team.
+2. **`event_schedule`** (stored, global): dated windows `registration`, `pitch_video`, `results` (start only), `payment`, `event`. Organisers edit them in `/admin/schedule`; never hard-code dates.
+
+`effectiveStage(stage, schedule)` in `src/lib/stage.js` turns these into the view, without any bulk updates when a date passes:
+
+| Effective stage | When | Home card |
+| --- | --- | --- |
+| `pitch_video` | stage `pitch_video`, video window open | Drive-link form (`PitchVideoForm` → `submitPitchVideo`). The link must be public: see below |
+| `missed` | stage `pitch_video`, video window closed | "Submissions closed" |
+| `in_review` | stage `in_review`, or shortlisted/not before `results.starts_at` | Saved link (editable while the window is open) + results date; a red warning if the link has stopped being public |
+| `shortlisted` | after the results date | Team code (copy), "Pay ₹fee" → `event_settings.razorpay_page_url` inside the `payment` window; auto-refreshes every 10 s |
+| `not_shortlisted` | after the results date | Thank-you message |
+| `paid` | stage `paid`, before `event` | Venue (if assigned) + countdown to the event start |
+| `live` | stage `paid`, during `event` | `InvestPanel`: who's pitching in the venue (polls `GET /api/pitch` every 5 s), budget, invest form (`investInPitch` → DB `invest()`) |
+| `over` | stage `paid`, after `event` | "PBJ is over" |
+
+**Public video links.** `checkDriveLink()` (`src/lib/drive.js`, server-only) asks Google Drive for the file as an anonymous visitor: 200 = public, a redirect to Google sign-in or 401/403 = private, 404 = missing. `submitPitchVideo` refuses private, missing and non-file links with instructions (`DRIVE_MESSAGES`); if Google doesn't answer clearly it saves the link and reminds the team to check sharing. The dashboard re-checks while the team is under review, the admin team page shows a live Public / Not public badge, and **Check video links** on `/admin/teams` checks every link under review. No API key is used; only the file id is sent to Google.
+
+Copy lives in `src/app/dashboard/HomeStage.jsx` (`STAGE_BADGE` and one card per stage). `/register` and `registerTeam` refuse outside the `registration` window.
+
+### Investing rules (enforced by `invest()` in the database)
+Only during the `event` window; the investor is paid and in the **same venue** as the team currently pitching there; not itself; not a team that the pitching team has invested in (no reverse holding); total invested ≤ `event_settings.invest_budget_max` (`invest_budget_min` is the target shown to teams); any number of investments; never below zero Peanuts. `src/lib/live.js` (`getLiveState`) mirrors these checks only to show the right message.
+
+### Payments
+Razorpay **Payment Page** with a required field labelled **Team code**, plus a webhook (`payment.captured`) to `/api/razorpay/webhook` signed with `RAZORPAY_WEBHOOK_SECRET`. The webhook stores every payment in `payments`; a correct-amount payment whose code matches a **shortlisted** team runs `confirm_team_payment()` (stage → `paid`, 100,000 Peanuts, once). Anything else is `unmatched` with a note, for an organiser in `/admin/payments`. Before launch: make one test-mode payment and check that the code arrives in `payment.notes` (the webhook looks for a key like `team_code`, else any note value containing `PBJ`).
+
+## Admin (`src/app/admin/*`)
+Organisers and admins only (`users.role`; set it in the DB). The layout calls `requireOrganiser()` (`src/lib/admin.js`) and every server action in `admin/actions.js` re-checks.
+- **Teams**: filter by stage, watch videos, Shortlist / Not shortlisted / Undo, Mark paid by hand (with a reference), Withdraw. Shows each team's Peanuts.
+- **Team detail** (`/admin/teams/[id]`, click a team anywhere in admin): leader phone, login and college email, all members, current Peanuts, teams it invested in and its investors (totals per team), judging marks per round and judge, payments, and the same actions plus Set venue.
+- **Payments**: match an unmatched payment to a shortlisted team, or ignore it (e.g. refunded).
+- **Venues**: add venues (`rooms`); move any paid team to a venue by hand; **Place unassigned teams** (fills the emptiest venues first, keeps existing assignments) or **Reshuffle all teams** (random, equal sizes; refused while a pitch is open). Both use `divideEvenly()` in `src/lib/venues.js`. Start/Next/End pitch (one open pitch per venue).
+- **Judging results**: pick a round; per venue, each team's average per criterion and overall (average of that round's judges' totals), ranked, with how many of the venue's judges in that round scored it.
+- **Judging setup**: rounds (create, edit name/scope/dates, delete while unscored); judges by email (not team leaders), with venues assigned per round and "Copy venues from…" another round; remove a judge (their scores stay). Criteria shared by all rounds: name, description, max, weight, order, on/off. The max can't drop below a score already given.
+- **Schedule**: edit the event dates (IST) and `event_settings` (fee, Peanuts granted, budget min/max, Payment Page URL). Judging dates are per round, in Judging setup.
+
+## Judging (`src/app/judge/*`)
+Judging happens in **rounds** (`judging_rounds`, created in `/admin/judges`): each has a name, dates, and a scope (all competing teams, or finalists only). Each round has its own judge-to-venue assignments (`judge_venues.round_id`) and its own results; criteria are shared. Judges (`users.role = 'judge'`) sign in at `/login` and land on `/judge` (`homeFor()`), which shows the open round (or the next one; tabs switch rounds): the teams in their venues for that round, with their own total for each. They score a team at `/judge/<team id>?round=<round id>`: one number per active criterion (0..max, halves allowed) plus private notes, saved by `saveScores` → `save_evaluation()`, only while the round is open. Judges never see other judges' scores. A judge's total is each score as a share of its max, weighted, ×100; a team's score in a round is the average across that round's judges (`team_judging`). Rounds are ranked separately; `leaderboard.avg_score` shows the latest round a team was judged in.
 
 Adding a dashboard section: add an entry to `VIEWS` in the page and a matching `view === '…'` block (wrapped in `.dash-view`, no card); query in the page (server) via `sql`, prefer the views (`team_balances`, `leaderboard`), render with `.pbj-reg.dash-card`. A larger feature gets its own route (see `docs/roadmap.md`).
