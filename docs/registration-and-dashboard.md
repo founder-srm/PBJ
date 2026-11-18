@@ -54,6 +54,13 @@ Server action. Order of checks:
 
 Server, dynamic. Signed out → `/login`; no team → `/register`.
 
-Shows: team name, status badge (`registered` = fee pending, `paid`, `finalist`, …), room (or "assigned at check-in"), wallet (`team_balances`), members (name, RA, SRM email, leader badge), and placeholder cards for **Invest**, **Shop**, **Leaderboard** ("Opens 15 Feb"), plus sign-out.
+Layout: a full-height sidebar fixed to the left edge of the screen (`.dash-side`, styles in `src/app/dashboard/dashboard.css`) with **Home**, **Team Details**, **Shop** and **Leaderboard**, plus the signed-in email and sign-out at the bottom. On phones (≤760px) it becomes a bottom tab bar. The page (header, content, footer) is offset by `--dash-side-w`. The selected item is navy (bright blue in dark mode), never red: red means an error.
 
-Adding a dashboard section: query in the page (server) via `sql`, prefer the views (`team_balances`, `leaderboard`), render with `.pbj-reg.dash-card` inside `.dash-grid`. A larger feature gets its own route (see `docs/roadmap.md`).
+The selected item comes from `?view=` (`home` default, `team`, `shop`, `leaderboard`); the server renders only that view, so it works without JS and the URL can be shared. Members are only queried for the team view.
+
+- **Home**: team name, wallet balance (`team_balances`) directly below it (with the fee note while `registered`), status and room badges, and a **What to do now** card.
+- **Team Details, Shop, Leaderboard**: no team header and no card; the page starts with the view's own title (`.dash-view`). Shop and Leaderboard are placeholders ("Opens 15 Feb").
+
+**What to do now** comes from `NEXT_STEP` in `src/app/dashboard/next-step.js`, keyed by `teams.status` (`title`, `body`, optional `steps` and `action`). For `registered` it asks for a 1-minute pitch video on Google Drive; the button uses `VIDEO_SUBMIT_URL` and shows "link will appear here soon" while it's empty. Edit the copy there.
+
+Adding a dashboard section: add an entry to `VIEWS` in the page and a matching `view === '…'` block (wrapped in `.dash-view`, no card); query in the page (server) via `sql`, prefer the views (`team_balances`, `leaderboard`), render with `.pbj-reg.dash-card`. A larger feature gets its own route (see `docs/roadmap.md`).

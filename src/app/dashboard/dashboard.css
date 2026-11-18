@@ -1,0 +1,51 @@
+/* Dashboard shell: a full-height sidebar fixed to the left edge of the screen;
+   the page (header, content, footer) sits to its right. On phones it becomes a bottom tab bar. */
+.dash-shell { --dash-side-w: 260px; --dash-pick: var(--inverse); --dash-on-pick: var(--on-inverse); padding-left: var(--dash-side-w); }
+/* Selection is navy in light mode; in dark mode navy vanishes against the sidebar, so use the bright blue. */
+[data-theme="dark"] .dash-shell { --dash-pick: var(--gain); --dash-on-pick: var(--surface); }
+.dash-shell .topbar { left: var(--dash-side-w); }
+
+.dash-side {
+  position: fixed; z-index: 40; top: 0; bottom: 0; left: 0; width: var(--dash-side-w);
+  display: flex; flex-direction: column; gap: var(--space-6);
+  padding: max(var(--space-8), env(safe-area-inset-top, 0px)) var(--space-4) var(--space-6) max(var(--space-4), env(safe-area-inset-left, 0px));
+  background: var(--cloud); border-right: 1px solid var(--line); box-shadow: var(--shadow-cloud); overflow-y: auto;
+}
+.dash-side-title { margin: 0; padding: 0 var(--space-4); font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
+.dash-side-nav { display: flex; flex-direction: column; gap: var(--space-2); }
+.dash-side-link { display: block; padding: 12px var(--space-4); border-radius: var(--radius-md); font: 700 16px var(--font-sans); color: var(--ink-muted); text-decoration: none; }
+.dash-side-link:hover { background: var(--surface); color: var(--ink); }
+.dash-side-link:focus-visible { outline: 3px solid var(--jelly); outline-offset: 2px; }
+.dash-side-link[aria-current="page"] { background: var(--dash-pick); color: var(--dash-on-pick); }
+.dash-side-foot { margin-top: auto; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); padding: var(--space-4) var(--space-4) 0; border-top: 1px solid var(--line); }
+.dash-side-foot .note { font-size: 14px; overflow-wrap: anywhere; }
+
+.dash-wallet-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); margin-top: var(--space-2); }
+
+/* Home: "What to do now" card */
+.dash-next { border-left: 6px solid var(--dash-pick); }
+.dash-next .pbj-reg-head h3 { margin: 0; }
+.dash-next-eyebrow { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
+.dash-next-steps { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: var(--space-2); color: var(--ink); font-size: 16px; line-height: 1.5; }
+
+/* Other views: no card, the page starts with the view itself */
+.dash-view { display: flex; flex-direction: column; gap: var(--space-8); }
+.dash-view-title { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-size: 48px; line-height: 1.1; font-weight: 700; color: var(--ink); }
+.dash-view .dash-members li { padding-bottom: var(--space-4); }
+.dash-view .dash-member-name { font-size: 18px; }
+
+@media (max-width: 1023px) { .dash-shell { --dash-side-w: 220px; } }
+
+@media (max-width: 760px) {
+  .dash-shell { padding-left: 0; padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+  .dash-shell .topbar { left: 0; }
+  .dash-side {
+    top: auto; right: 0; width: auto; flex-direction: row; gap: 0;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    border-right: 0; border-top: 1px solid var(--line); overflow: visible;
+  }
+  .dash-side-title, .dash-side-foot { display: none; }
+  .dash-side-nav { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .dash-side-link { padding: 12px 4px; border-radius: var(--radius-pill); text-align: center; font-size: 13px; line-height: 1.2; }
+  .dash-view-title { font-size: 34px; }
+}

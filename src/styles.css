@@ -11,6 +11,8 @@ h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; }
 /* Top bar */
 .topbar { position: fixed; z-index: 30; top: env(safe-area-inset-top, 0px); left: 0; right: 0; padding: 28px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); pointer-events: none; }
 .topbar .pbj-nav { max-width: 1180px; margin: 0 auto; pointer-events: auto; }
+/* In the open phone menu the icon buttons (theme, log out) are full-width rows, so show their text. */
+@media (max-width: 760px) { .topbar .pbj-nav.open > .pbj-nav-icon .pbj-nav-icon-label { position: static; width: auto; height: auto; overflow: visible; clip: auto; } }
 
 /* Story: a sticky 3D stage with chapters scrolling over it */
 .story { position: relative; }

@@ -1,6 +1,7 @@
 'use client';
 
 // Header and footer shared by every page. Links are absolute so they work from any route.
+import { useEffect, useState } from 'react';
 import { Button, Footer, NavBar } from './design-system/components.jsx';
 import { authClient } from './lib/auth/client.js';
 import { useViewerStatus } from './lib/useViewerStatus.js';
@@ -34,6 +35,41 @@ function LogoutButton() {
   );
 }
 
+// Light/dark switch. The pre-paint script in layout.jsx applies the saved choice; this flips <html data-theme>
+// and saves it. Starts neutral (moon) until mounted to avoid a hydration mismatch.
+function ThemeToggle() {
+  const [theme, setTheme] = useState(null);
+  useEffect(() => {
+    const html = document.documentElement;
+    const read = () => setTheme(html.dataset.theme === 'dark' ? 'dark' : 'light');
+    read();
+    const watch = new MutationObserver(read); // the OS can still change it while no choice is saved
+    watch.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => watch.disconnect();
+  }, []);
+  function toggle() {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('pbj-theme', next); } catch {}
+  }
+  const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  return (
+    <button type="button" className="pbj-nav-icon" onClick={toggle} title={label} aria-label={label}>
+      {theme === 'dark' ? (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+        </svg>
+      )}
+      <span className="pbj-nav-icon-label" aria-hidden="true">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+    </button>
+  );
+}
+
 // Signed out: "Login". Signed in: "Register" (or "Dashboard" once the team exists) plus a log-out door.
 export function SiteHeader() {
   // Shows the signed-out label first and switches once the session (and team) check answers.
@@ -48,7 +84,7 @@ export function SiteHeader() {
       <NavBar
         links={NAV}
         cta={cta}
-        actions={signedIn ? <LogoutButton /> : null}
+        actions={<><ThemeToggle />{signedIn ? <LogoutButton /> : null}</>}
         homeHref="/"
         logo={{ src: '/brand/founders-club.png', alt: 'Founders Club home' }}
       />

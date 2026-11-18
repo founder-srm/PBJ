@@ -17,9 +17,10 @@ export const viewport = {
   ],
 };
 
-// The design system styles dark mode with [data-theme="dark"]. This runs before first paint and mirrors the
-// viewer's OS setting onto <html>, so there's no flash of the wrong theme.
-const themeScript = `(function(){var m=window.matchMedia('(prefers-color-scheme: dark)');function a(){document.documentElement.dataset.theme=m.matches?'dark':'light'}a();m.addEventListener('change',a)})();`;
+// The design system styles dark mode with [data-theme="dark"]. This runs before first paint so there's no flash
+// of the wrong theme. A choice made with the navbar toggle (ThemeToggle in src/site.jsx, saved as
+// localStorage 'pbj-theme') wins; otherwise <html> mirrors the viewer's OS setting and follows it live.
+const themeScript = `(function(){var m=window.matchMedia('(prefers-color-scheme: dark)');function s(){try{var v=localStorage.getItem('pbj-theme');return v==='light'||v==='dark'?v:null}catch(e){return null}}function a(){document.documentElement.dataset.theme=s()||(m.matches?'dark':'light')}a();m.addEventListener('change',a)})();`;
 
 export default function RootLayout({ children }) {
   return (
