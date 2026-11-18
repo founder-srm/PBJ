@@ -1,0 +1,105 @@
+/* PBJ Design System — generated from tokens.json */
+:root, [data-theme="light"] {
+  --sky: #87ceeb;
+  --surface: #eef7fc;
+  --cloud: #fbfdff;
+  --line: #c9ddea;
+  --line-strong: #5e86a6;
+  --ink: #0b2545;
+  --ink-muted: #2f4e6b;
+  --jelly: #f00f2c;
+  --on-jelly: #ffffff;
+  --jelly-text: #c8001e;
+  --jelly-soft: #ffe1e5;
+  --butter: #b47634;
+  --butter-soft: #f7e6cc;
+  --butter-text: #7a4a14;
+  --gain: #0057b8;
+  --gain-soft: #e0eeff;
+  --inverse: #0b2545;
+  --on-inverse: #fbfdff;
+  --on-inverse-accent: #87ceeb;
+  --focus: #0b2545;
+  --shadow-cloud: 0 12px 32px rgba(11, 37, 69, 0.12);
+  --shadow-lift: 0 24px 60px rgba(11, 37, 69, 0.22);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sky: #0e2240;
+    --surface: #0a1729;
+    --cloud: #1a3a60;
+    --line: #2b4b70;
+    --line-strong: #6e93b8;
+    --ink: #eaf4fb;
+    --ink-muted: #a9c3d8;
+    --jelly: #ff4d63;
+    --on-jelly: #0a1729;
+    --jelly-text: #ff7a8c;
+    --jelly-soft: #45101b;
+    --butter: #e2ae6e;
+    --butter-soft: #3a2712;
+    --butter-text: #f2c98e;
+    --gain: #7cc4ff;
+    --gain-soft: #0f2f55;
+    --inverse: #123a66;
+    --on-inverse: #eaf4fb;
+    --on-inverse-accent: #9ad8f2;
+    --focus: #ffffff;
+    --shadow-cloud: 0 12px 32px rgba(0, 0, 0, 0.45);
+    --shadow-lift: 0 24px 60px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+[data-theme="dark"] {
+  --sky: #0e2240;
+  --surface: #0a1729;
+  --cloud: #1a3a60;
+  --line: #2b4b70;
+  --line-strong: #6e93b8;
+  --ink: #eaf4fb;
+  --ink-muted: #a9c3d8;
+  --jelly: #ff4d63;
+  --on-jelly: #0a1729;
+  --jelly-text: #ff7a8c;
+  --jelly-soft: #45101b;
+  --butter: #e2ae6e;
+  --butter-soft: #3a2712;
+  --butter-text: #f2c98e;
+  --gain: #7cc4ff;
+  --gain-soft: #0f2f55;
+  --inverse: #123a66;
+  --on-inverse: #eaf4fb;
+  --on-inverse-accent: #9ad8f2;
+  --focus: #ffffff;
+  --shadow-cloud: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-lift: 0 24px 60px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+  --font-display: Rubik, "Trebuchet MS", Arial, sans-serif;
+  --font-sans: "DM Sans", "Segoe UI", Arial, sans-serif;
+}
+.display-xl { font-family: var(--font-display); font-size: 96px; line-height: 0.95; font-weight: 700; letter-spacing: -0.02em; }
+.display-l { font-family: var(--font-display); font-size: 64px; line-height: 1.05; font-weight: 700; letter-spacing: -0.01em; }
+.heading { font-family: var(--font-display); font-size: 40px; line-height: 1.1; font-weight: 700; }
+.title { font-family: var(--font-display); font-size: 26px; line-height: 1.2; font-weight: 600; }
+.numeral { font-family: var(--font-display); font-size: 56px; line-height: 1; font-weight: 700; }
+.lead { font-family: var(--font-sans); font-size: 21px; line-height: 1.5; font-weight: 400; }
+.body { font-family: var(--font-sans); font-size: 17px; line-height: 1.6; font-weight: 400; }
+.small { font-family: var(--font-sans); font-size: 15px; line-height: 1.5; font-weight: 400; }
+.button { font-family: var(--font-sans); font-size: 19px; line-height: 1; font-weight: 700; }
+.label { font-family: var(--font-sans); font-size: 13px; line-height: 1.2; font-weight: 700; letter-spacing: 0.12em; }
