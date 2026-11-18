@@ -54,9 +54,9 @@ Server action. Order of checks:
 
 Server, dynamic. Signed out → `/login`; no team → `/register`.
 
-Layout: a full-height sidebar fixed to the left edge of the screen (`.dash-side`, styles in `src/app/dashboard/dashboard.css`) with **Home**, **Team Details**, **Shop** and **Leaderboard**, plus the signed-in email and sign-out at the bottom. On phones (≤760px) it becomes a bottom tab bar. The page (header, content, footer) is offset by `--dash-side-w`. The selected item is navy (bright blue in dark mode), never red: red means an error.
+Layout: a full-height sidebar fixed to the left edge of the screen (`.dash-side`, styles in `src/app/dashboard/dashboard.css`) with **Home**, **Shop**, **Leaderboard** and **Team Details**, plus the signed-in email and sign-out at the bottom. On phones (≤760px) it becomes a bottom tab bar. The page (header, content, footer) is offset by `--dash-side-w`. The selected item is navy (bright blue in dark mode), never red: red means an error.
 
-The selected item comes from `?view=` (`home` default, `team`, `shop`, `leaderboard`); the server renders only that view, so it works without JS and the URL can be shared. Members are only queried for the team view.
+The selected item comes from `?view=` (`home` default, `shop`, `leaderboard`, `team`); the server renders only that view, so it works without JS and the URL can be shared. Members are only queried for the team view.
 
 - **Home**: team name, wallet balance (`team_balances`) directly below it (with the fee note while `registered`), status and room badges, and a **What to do now** card.
 - **Team Details, Shop, Leaderboard**: no team header and no card; the page starts with the view's own title (`.dash-view`). Shop and Leaderboard are placeholders ("Opens 15 Feb").

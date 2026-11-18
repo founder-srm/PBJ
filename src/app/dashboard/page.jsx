@@ -24,9 +24,9 @@ const STATUS = {
 // Sidebar items. The selected one comes from ?view=; the first (home) is the default.
 const VIEWS = [
   { id: 'home', label: 'Home' },
-  { id: 'team', label: 'Team Details' },
   { id: 'shop', label: 'Shop' },
   { id: 'leaderboard', label: 'Leaderboard' },
+  { id: 'team', label: 'Team Details' },
 ];
 
 const opensOn = `Opens ${EVENT.dates.split('–')[0]} Feb`;
